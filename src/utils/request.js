@@ -9,10 +9,10 @@ const request = axios.create({
 // axios.craete是axios的克隆当有多个baseURL时可以再次克隆出来一样一起暴露出去
 request.interceptors.request.use(function (config) {
   const {
-    getters: { isLogin },
+    getters: { islogin },
     state: { tokenObj }
   } = store
-  if (isLogin) {
+  if (islogin) {
     config.headers.Authorization = `Bearer ${tokenObj.token}`
   }
   return config
