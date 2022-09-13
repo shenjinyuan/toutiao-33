@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        //extends执行器函数
+        const PENDING = 'pending'
+        const FUILLED = 'fulfilled'
+        const REJECTED = 'rejected'
+        onRejectedCallBacks=[]
+        onFulfilledCallBacks=[]
+        class Promise {
+            value
+            reason
+            onFulfilled
+            onRejected
+            status = PENDING
+            constructor(excutor) {
+                const resolve = (value) => {
+                    if (this.status == PENDING) {
+                        this.value = value
+                        this.status = FUILLED
+                        this.onFulfilled(this.value)
+                    }
+
+                }
+                const reject = (reason) => {
+                    if (this.status == PENDING) {
+                        this.reason = reason
+                        this.status = REJECTED
+                        this.onRejected(this.reason)
+                    }
+                }
+                try {
+                    excutor(resolve, reject)
+                } catch (error) {
+                    reject(error)
+
+                }
+            }
+            // 定义then方法 
+            then(onFulfilled, onRejected) {
+                if (this.status === FUILLED) {
+                    onFulfilled(this.value)
+                }
+                if (this.status === REJECTED) {
+                    onRejected(this.reason)
+                }
+                if(this.status === PENDING) {
+                    this.onFulfilledCallBacks.push(()=>{
+                        onFulfilled(this.value)
+                    })
+                    this.onRejectedCallBacks.push(()=>{
+                        onRejected(this.reason)
+                    })
+                }
+            }
+
+        }
+
+        const p = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject('失败')
+                // resolve('成功')
+            }, 1000);
+        });
+        p.then(
+            (res)=>{
+                console.log(res);
+            },
+            (err)=>{
+                console.log(err);
+            }
+        )
+
+    //     const p1 = new Promise(() => { }) //Pending
+    // const p2 = new Promise((resolve) => resolve()) // fulfilled
+    // const p3 = new Promise((resolve, reject) => reject()) // rejected
+// console.log(p);
+    // console.log(
+    //   'p1', p1,
+    //   'p2', p2,
+    //   'p3', p3
+    // )
+    </script>
+</body>
+
+</html>

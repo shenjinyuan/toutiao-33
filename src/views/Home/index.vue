@@ -11,22 +11,38 @@
         <!-- wenzhang -->
         <ArtideList :id="item.id"></ArtideList>
       </van-tab>
-      <span class="toutiao toutiao-gengduo"></span>
+      <span class="toutiao toutiao-gengduo" @click="isShow = true"></span>
     </van-tabs>
+    <!--  -->
+    <van-popup
+      v-model="isShow"
+      position="bottom"
+      :style="{ height: '100%' }"
+      closeable
+      close-icon-position="top-left"
+    >
+      <ChannelEdit
+        :myChannels="channels"
+        @change-active=";[(isShow = false), (active = $event)]"
+      ></ChannelEdit>
+    </van-popup>
   </div>
 </template>
 
 <script>
+import ChannelEdit from './components/ChannelEdit.vue'
 import { getChannelsAPI } from '@/api'
 import ArtideList from './components/ArtideList.vue'
 export default {
   components: {
-    ArtideList
+    ArtideList,
+    ChannelEdit
   },
   data() {
     return {
       active: 0,
-      channels: []
+      channels: [],
+      isShow: false
     }
   },
   created() {

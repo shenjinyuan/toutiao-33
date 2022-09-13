@@ -6,13 +6,9 @@
       :title="article.title"
       :label="label"
     >
-      <van-image
-        width="100"
-        height="100"
-        :src="article.cover.images[0]"
-      />
+      <van-image width="100" height="100" :src="article.cover.images[0]" />
     </van-cell>
-    <van-cell v-else :title="article.title" >
+    <van-cell v-else :title="article.title">
       <template #label>
         <van-image
           v-for="(item, index) in article.cover.images"
@@ -28,6 +24,7 @@
 </template>
 
 <script>
+import dayjs from '@/utils/day.js'
 export default {
   props: {
     article: {
@@ -41,7 +38,7 @@ export default {
       // eslint-disable-next-line camelcase
       const { aut_name, comm_count, pubdata } = this.article
       // eslint-disable-next-line camelcase
-      return `${aut_name} ${comm_count}评价 ${pubdata}}`
+      return `${aut_name} ${comm_count}评价 ${dayjs(pubdata).fromNow()}}`
     }
   }
 }
