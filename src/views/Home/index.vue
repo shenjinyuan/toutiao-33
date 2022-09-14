@@ -22,8 +22,11 @@
       close-icon-position="top-left"
     >
       <ChannelEdit
+      v-if="isShow"
         :myChannels="channels"
         @change-active=";[(isShow = false), (active = $event)]"
+        @del-channels="delChannel"
+        @add-channels="addChannel"
       ></ChannelEdit>
     </van-popup>
   </div>
@@ -31,8 +34,9 @@
 
 <script>
 import ChannelEdit from './components/ChannelEdit.vue'
-import { getChannelsAPI } from '@/api'
+import { getChannelsAPI, delChannelAPI, addChannelAPI } from '@/api'
 import ArtideList from './components/ArtideList.vue'
+import { mapGetters, mapMutations } from 'vuex'
 export default {
   components: {
     ArtideList,
@@ -46,9 +50,26 @@ export default {
     }
   },
   created() {
-    this.getChannel()
+    this.initChannels()
+  },
+  computed: {
+    ...mapGetters(['islogin'])
   },
   methods: {
+    ...mapMutations(['SET_MY_CHANNELS']),
+    initChannels() {
+      if (this.islogin) {
+        this.getChannel()
+      } else {
+        const myChannels = this.$store.state.myChannels
+        console.log(myChannels)
+        if (myChannels.length === 0) {
+          this.getChannel()
+        } else {
+          this.channels = myChannels
+        }
+      }
+    },
     async getChannel() {
       try {
         const { data } = await getChannelsAPI()
@@ -59,6 +80,43 @@ export default {
         } else {
           const status = error.response.status
           status === 507 && this.$toast.faik('服务器异常，请刷新')
+        }
+      }
+    },
+    async delChannel(id) {
+      try {
+        const newChannels = this.channels.filter((item) => item.id !== id)
+        if (this.islogin) {
+          await delChannelAPI(id)
+        } else {
+          // 把我的频道存在本地存储里面
+          this.SET_MY_CHANNELS(newChannels)
+        }
+        this.channels = newChannels
+        this.$toast.success('删除频道成功')
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          this.$toast.fail('请登录在删除')
+        } else {
+          throw error
+        }
+      }
+    },
+    async addChannel(channel) {
+      try {
+        if (this.islogin) {
+          await addChannelAPI(channel.id, this.channels.length)
+        } else {
+          // 把我的频道存在本地存储里面
+          this.SET_MY_CHANNELS([...this.channels, channel])
+        }
+        this.channels.push(channel)
+        this.$toast.success('添加成功')
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          this.$toast.fail('请登录在删除')
+        } else {
+          throw error
         }
       }
     }

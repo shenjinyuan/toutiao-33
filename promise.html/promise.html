@@ -14,8 +14,8 @@
         const PENDING = 'pending'
         const FUILLED = 'fulfilled'
         const REJECTED = 'rejected'
-        onRejectedCallBacks=[]
-        onFulfilledCallBacks=[]
+        onRejectedCallBacks = []
+        onFulfilledCallBacks = []
         class Promise {
             value
             reason
@@ -47,20 +47,43 @@
             }
             // 定义then方法 
             then(onFulfilled, onRejected) {
-                if (this.status === FUILLED) {
-                    onFulfilled(this.value)
-                }
-                if (this.status === REJECTED) {
-                    onRejected(this.reason)
-                }
-                if(this.status === PENDING) {
-                    this.onFulfilledCallBacks.push(()=>{
-                        onFulfilled(this.value)
-                    })
-                    this.onRejectedCallBacks.push(()=>{
-                        onRejected(this.reason)
-                    })
-                }
+                return new Promise((resolve, reject) => {
+                    if (this.status === FUILLED) {
+                        queueMicrotask(() => {
+                            try {
+                                onFulfilled(this.value)
+                            } catch (error) {
+                                reject(error)
+                            }
+                        })
+                    }
+                    if (this.status === REJECTED) {
+                        queueMicrotask(() => {
+
+                            try {
+                                onRejected(this.reason)
+                            } catch (error) {
+                                reject(error)
+                            }
+                        })
+                    }
+                    if (this.status === PENDING) {
+                        this.onFulfilledCallbacks.push(
+                            () => {
+                                onFulfilled(this.value)
+                            }
+                        )
+                        this.onRejectedCallbacks.push(() => {
+                            queueMicrotask(() => {
+                                try {
+                                    onRejected(this.reason)
+                                } catch (error) {
+                                    reject(error)
+                                }
+                            })
+                        })
+                    }
+                })
             }
 
         }
@@ -72,10 +95,10 @@
             }, 1000);
         });
         p.then(
-            (res)=>{
+            (res) => {
                 console.log(res);
             },
-            (err)=>{
+            (err) => {
                 console.log(err);
             }
         )
