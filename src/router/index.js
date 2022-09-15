@@ -14,7 +14,8 @@ const routes = [
       },
       {
         path: '/video',
-        component: () => import(/* webpackChunkName:"beat" */ '@/views/Video/index.vue')
+        component: () =>
+          import(/* webpackChunkName:"beat" */ '@/views/Video/index.vue')
       },
       {
         path: '/profile',
@@ -23,6 +24,10 @@ const routes = [
       {
         path: '/qa',
         component: () => import('@/views/QA')
+      },
+      {
+        path: '/search',
+        component: () => import(/* webpackname:'Search' */ '@/views/Search')
       }
     ]
   },
